@@ -121,11 +121,15 @@ class DVFLoader:
         df["nb_pieces"] = pd.to_numeric(df["nb_pieces"], errors="coerce")
         df["nombre_lots"] = pd.to_numeric(df["nombre_lots"], errors="coerce")
 
-        # 5. Nettoyer code_commune
+        # 5. Construire le vrai code commune INSEE (département + code commune)
+        df["code_departement"] = df["code_departement"].astype(str).str.strip()
+        df["code_departement"] = df["code_departement"].str.replace(r"\.0$", "", regex=True)
+
         df["code_commune"] = df["code_commune"].astype(str).str.strip()
-        # Enlever le .0 si présent (ex: "75056.0" -> "75056")
         df["code_commune"] = df["code_commune"].str.replace(r"\.0$", "", regex=True)
-        df["code_commune"] = df["code_commune"].str.zfill(5)
+
+        # Combiner: dept "75" + commune "117" = "75117"
+        df["code_commune"] = df["code_departement"] + df["code_commune"].str.zfill(3)
 
         # 6. Nettoyer code_postal
         df["code_postal"] = df["code_postal"].astype(str).str.strip()
